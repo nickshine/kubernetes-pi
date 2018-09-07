@@ -1,4 +1,4 @@
-# kubernetes-pi
+# Raspberry Pi Kubernetes Cluster
 >Learning how to create a Kubernetes cluster from scratch with some Raspberry Pis.
 
 ## Cluster Hardware
@@ -15,6 +15,10 @@
 ## Tools
 
 * [UbiGear Ethernet Cable Crimper Kit + 100 RJ45][cable-kit]
+
+![Pi Cluster](images/pi-cluster-01.jpg)
+![Pi Cluster](images/pi-cluster-02.jpg)
+![Pi Cluster](images/pi-cluster-03.jpg)
 
 [model-b+]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/
 [model-b]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b/
