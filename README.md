@@ -95,6 +95,7 @@ Component | Quantity
 [etcher]:https://etcher.io/
 [electron]:https://electronjs.org/
 [raspbian-download]:https://downloads.raspberrypi.org/raspbian_lite_latest
+[avahi]:https://linux.die.net/man/8/avahi-daemon
 
 [k8s-raspbian]:https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975
 [headlaess-pi]:https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
