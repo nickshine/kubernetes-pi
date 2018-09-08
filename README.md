@@ -158,5 +158,5 @@ Component | Quantity
 [install-addons]:https://kubernetes.io/docs/concepts/cluster-administration/addons/
 
 [k8s-raspbian]:https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975
-[headlaess-pi]:https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
+[headless-pi]:https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
 [ssh-mac-ethernet]:https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055
