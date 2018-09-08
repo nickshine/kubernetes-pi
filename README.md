@@ -55,13 +55,32 @@ Component | Quantity
 	```bash
 	touch shh /Volumes/boot/
 	```
+	* __Note:__ may need to mount the sd card after flashing.
+4. SSH in to the Pi directly from Ethernet adapter.
+	* [Enable _Internet Sharing_][ssh-mac-ethernet]
+	* Raspbian should have [Avahi Daemon][avahi] running, allowing for
+	  connection with `raspberrypi.local`:
+	```bash
+	ping raspberrypi.local
+	ssh pi@raspberrypi.local    # default pi password is 'raspberry'
+	```
+	* if the above doesn't work, look for the ethernet adapter (bridge100) inet address:
+	```
+	ifconfig
 
+	# install nmap and discover ethernet devices
+	brew install nmap
+	nmap -n -sn 192.168.2.1/24     # ip address may differ
+	ssh pi@192.168.2.2      # ip address may differ
+	```
 
 ---
 
 ## Reference
 
 * [Kubernetes on Raspbian Lite][k8s-raspbian]
+* [Headless Raspberry Pi Install][headless-pi]
+* [How to SSH into your Raspberry Pi with Mac and Ethernet Cable][ssh-mac-ethernet]
 
 [model-b+]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/
 [model-b]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b/
@@ -73,7 +92,10 @@ Component | Quantity
 [rj45-boots]: http://a.co/d/ieb0iN0
 [cable-kit]:http://a.co/d/jc7bpds
 [alex-ellis]:https://gist.github.com/alexellis
-[k8s-raspbian]:https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975
 [etcher]:https://etcher.io/
 [electron]:https://electronjs.org/
 [raspbian-download]:https://downloads.raspberrypi.org/raspbian_lite_latest
+
+[k8s-raspbian]:https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975
+[headlaess-pi]:https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
+[ssh-mac-ethernet]:https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055
