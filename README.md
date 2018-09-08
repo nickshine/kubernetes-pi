@@ -56,6 +56,7 @@ Component | Quantity
 	touch /Volumes/boot/shh
 	```
 	* __Note:__ may need to mount the sd card after flashing.
+	* Insert flashed sd card in to pi.
 4. SSH in to the Pi directly from Ethernet adapter.
 	* [Enable _Internet Sharing_][ssh-mac-ethernet]
 	* Raspbian should have [Avahi Daemon][avahi] running, allowing for
@@ -64,7 +65,7 @@ Component | Quantity
 	ping raspberrypi.local
 	ssh pi@raspberrypi.local    # default pi password: raspberry
 	```
-	* if the above doesn't work, look for the ethernet adapter (bridge100) inet address:
+	If the above doesn't work, look for the ethernet adapter (bridge100) inet address:
 	```
 	ifconfig
 
@@ -74,6 +75,36 @@ Component | Quantity
 	ssh pi@192.168.2.2
 	```
 	* __Note:__ ipaddress may differ
+5. Setup Locale and modify hostname to `k8s-master` using `raspi-config` util and reboot.
+	```bash
+	sudo raspi-config
+	```
+	* __Note:__ SSH in to rasspberry pi with `k8s-master.local` now.
+6. Setup Docker
+	```bash
+	curl -sSL get.docker.com | sh
+	sudo usermod pi -aG docker
+	newgrp docker
+	```
+7. Turn off swap space (required for K8s)
+	```bash
+	sudo dphys-swapfile swapoff
+	sudo dphys-swapfile uninstall
+	sudo update-rc.d dphys-swapfile remove
+	```
+8. Enable __cgroups__ and reboot:
+	```bash
+	sudo vi /boot/cmdline.txt
+	```
+	Add to existing line:
+	```bash
+	cgroup_enable=cpuset cgroup_enable=1
+	```
+	```bash
+	sudo reboot
+	```
+
+
 
 ---
 
