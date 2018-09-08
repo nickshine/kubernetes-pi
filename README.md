@@ -44,13 +44,17 @@ Component | Quantity
 ### Master Node
 
 1. Download [Raspbian Stretch Lite][raspbian-download].
-2. Flash SD Cards.
-[Etcher][etcher] is an open-source [Electron][electron] app for flashing OS
-images to SD cards and USB drives.
+2. Flash SD Card with the unzipped raspbian image.
+	[Etcher][etcher] is an open-source [Electron][electron] app for flashing OS
+	images to SD cards and USB drives.
 
-```bash
-brew cask install etcher
-```
+	```bash
+	brew cask install etcher
+	```
+3. Enable __ssh__ on the SD card:
+	```bash
+	touch shh /Volumes/boot/
+	```
 
 
 ---
