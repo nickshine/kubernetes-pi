@@ -53,7 +53,7 @@ Component | Quantity
 	```
 3. Enable __ssh__ on the SD card:
 	```bash
-	touch shh /Volumes/boot/
+	touch /Volumes/boot/shh
 	```
 	* __Note:__ may need to mount the sd card after flashing.
 4. SSH in to the Pi directly from Ethernet adapter.
