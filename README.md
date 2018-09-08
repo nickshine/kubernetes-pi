@@ -98,12 +98,38 @@ Component | Quantity
 	```
 	Add to existing line:
 	```bash
-	cgroup_enable=cpuset cgroup_enable=1
+	cgroup_enable=cpuset cgroup_enable=memory
 	```
 	```bash
 	sudo reboot
 	```
+9. [Install kubeadm][kubeadm]
+	```bash
+	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+	echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+	sudo apt-get update
+	sudo apt-get install -y kubeadm
+	```
+10. Initialize master node
+	
+	```bash
+	sudo kubeadm init --token-ttl=0 # takes ~10 mins
+	mkdir -p $HOME/.kube
+	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+	sudo chown $(id -u):$(id -g) $HOME/.kube/config
+	```
+11. Save the generated `join-token` for the other nodes:
+	```bash
+	# example
+	kubeadm join 192.168.2.2:6443 --token jovjri.gn9250040r4ss0vc --discovery-token-ca-cert-hash sha256:bee697b5558e9f10ac4010d558d8c6e0a93f2ad61c217049dfdad49bec8799bf
+	```
 
+12. Verify everything is running (system pods might show `Pending` for a while) and install addons:
+	```bash
+	kubectl --namespace=kube-system get pods
+	```
+	* See the [installing addons][install-addons] doc
+	* Run `kubectl apply -f [podnetwork].yaml` with one of the addons to deploy it to the cluster.
 
 
 ---
@@ -128,6 +154,8 @@ Component | Quantity
 [electron]:https://electronjs.org/
 [raspbian-download]:https://downloads.raspberrypi.org/raspbian_lite_latest
 [avahi]:https://linux.die.net/man/8/avahi-daemon
+[kubeadm]:https://kubernetes.io/docs/setup/independent/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
+[install-addons]:https://kubernetes.io/docs/concepts/cluster-administration/addons/
 
 [k8s-raspbian]:https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975
 [headlaess-pi]:https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
