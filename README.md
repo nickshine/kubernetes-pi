@@ -62,7 +62,7 @@ Component | Quantity
 	  connection with `raspberrypi.local`:
 	```bash
 	ping raspberrypi.local
-	ssh pi@raspberrypi.local    # default pi password is 'raspberry'
+	ssh pi@raspberrypi.local    # default pi password: raspberry
 	```
 	* if the above doesn't work, look for the ethernet adapter (bridge100) inet address:
 	```
@@ -70,9 +70,10 @@ Component | Quantity
 
 	# install nmap and discover ethernet devices
 	brew install nmap
-	nmap -n -sn 192.168.2.1/24     # ip address may differ
-	ssh pi@192.168.2.2      # ip address may differ
+	nmap -n -sn 192.168.2.1/24
+	ssh pi@192.168.2.2
 	```
+	* __Note:__ ipaddress may differ
 
 ---
 
