@@ -73,12 +73,15 @@ Component | Quantity
 	ssh pi@192.168.2.2
 	```
 	* __Note:__ ipaddress may differ
-5. Setup Locale and modify hostname to `k8s-master` using `raspi-config` util and reboot.
+
+5. Setup Locale and modify hostname to (e.g. `k8s-master`) using `raspi-config` util and reboot.
 	```bash
 	sudo raspi-config
 	```
-	* __Note:__ Select locales with `spacebar` in raspi-config.
-	* __Note:__ SSH in to rasspberry pi with `k8s-master.local` now.
+	__Note:__
+	* Select locales with `spacebar` in raspi-config.
+	* SSH in to rasspberry pi with `<hostname>.local` now (e.g. `ssh pi@k8s-master.local`).
+
 6. Setup Docker
 	```bash
 	curl -sSL get.docker.com | sh
@@ -124,7 +127,7 @@ Component | Quantity
 2. Save the generated `join-token` for the other nodes:
 	```bash
 	# example
-	kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
+	sudo kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
 	```
 
 3. Verify everything is running (system pods might show `Pending` for a while) and install addons:
@@ -159,10 +162,13 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 	```
 2. Join the nodes to the cluster:
 	```bash
-	kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
+	sudo kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
 	```
-
-
+3. Verify cluster is set up:
+	```bash
+	kubectl get nodes
+	```
+	>__Note:__ run this command from master node.. see step 5 from the [Master Node](#master-node) setup above.
 
 ---
 
