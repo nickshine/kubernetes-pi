@@ -4,6 +4,7 @@
 * [Hardware Build](#hardware-build)
 * [Setup](#setup)
   * [Master Node](#master-node)
+  * [Worker Nodes](#worker-nodes)
 * [Reference](#reference)
 
 ---
@@ -40,8 +41,6 @@ Component | Quantity
 >__Note:__ These instructions are for Macs. Much of this setup is following the
 [Kubernetes on Raspbian Lite][k8s-raspbian] guide by [Alex Ellis][alex-ellis].
 
-### Master Node
-
 1. Download [Raspbian Stretch Lite][raspbian-download].
 2. Flash SD Card with the unzipped raspbian image.
 	[Etcher][etcher] is an open-source [Electron][electron] app for flashing OS
@@ -52,9 +51,9 @@ Component | Quantity
 	```
 3. Enable __ssh__ by placing an empty file on the sd card:
 	```bash
-	touch /Volumes/boot/shh
+	touch /Volumes/boot/ssh
 	```
-	* __Note:__ may need to mount the sd card after flashing.
+	* __Note:__ may need to mount the sd card after flashing. Example: `diskutil mount /dev/disk2s1`.
 	* Insert flashed sd card in to pi.
 4. SSH in to the Pi directly from Ethernet adapter.
 	* [Enable _Internet Sharing_][ssh-mac-ethernet]
@@ -70,7 +69,7 @@ Component | Quantity
 
 	# install nmap and discover ethernet devices
 	brew install nmap
-	nmap -n -sn 192.168.2.1/24
+	sudo nmap -n -sn 192.168.2.1/24
 	ssh pi@192.168.2.2
 	```
 	* __Note:__ ipaddress may differ
@@ -78,6 +77,7 @@ Component | Quantity
 	```bash
 	sudo raspi-config
 	```
+	* __Note:__ Select locales with `spacebar` in raspi-config.
 	* __Note:__ SSH in to rasspberry pi with `k8s-master.local` now.
 6. Setup Docker
 	```bash
@@ -91,15 +91,13 @@ Component | Quantity
 	sudo dphys-swapfile uninstall
 	sudo update-rc.d dphys-swapfile remove
 	```
-8. Enable __cgroups__ and reboot:
+8. Enable __cgroups__ in `/boot/cmdline.txt` and reboot:
 	```bash
-	sudo vi /boot/cmdline.txt
-	```
-	Add to existing line:
-	```bash
-	cgroup_enable=cpuset cgroup_enable=memory
+	bflags="$(head -n1 /boot/cmdline.txt) cgroup_enable=cpuset cgroup_enable=memory"
+	echo $bflags | sudo tee /boot/cmdline.txt
 	```
 	__Note:__ `cgroup_memory=1` might be needed for some pi3 models.
+
 	```bash
 	sudo reboot
 	```
@@ -110,7 +108,12 @@ Component | Quantity
 	sudo apt-get update
 	sudo apt-get install -y kubeadm
 	```
-10. Initialize master node
+
+### Master Node
+
+>__Note:__ Continue on to the [Worker Nodes](#worker-nodes) setup below for non-master nodes.
+
+1. Initialize master node
 	
 	```bash
 	sudo kubeadm init --token-ttl=0 # takes ~10 mins
@@ -118,31 +121,47 @@ Component | Quantity
 	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 	sudo chown $(id -u):$(id -g) $HOME/.kube/config
 	```
-11. Save the generated `join-token` for the other nodes:
+2. Save the generated `join-token` for the other nodes:
 	```bash
 	# example
 	kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
 	```
 
-12. Verify everything is running (system pods might show `Pending` for a while) and install addons:
+3. Verify everything is running (system pods might show `Pending` for a while) and install addons:
 	```bash
 	kubectl --namespace=kube-system get pods
 	```
 	* See the [installing addons][install-addons] doc
 	* Run `kubectl apply -f [podnetwork].yaml` with one of the addons to deploy it to the cluster.
 
-13. Install a network driver like [Weave Net][weave-net]:
+4. Install a network driver like [Weave Net][weave-net]:
 	```bash
 	kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 	```
 
-14. Copy cluster `config` to local machine to connect with cluster without `ssh`ing in to the master node:
+5. Copy cluster `config` to local machine to connect with cluster without `ssh`ing in to the master node:
 	```bash
-	# from mac/non-pi
+	# from mac
 	scp pi@k8s-master.local:~/.kube/config ~/.kube/config-pi
 	export KUBECONFIG=$KUBECONFIG:$HOME/.kube/config:$HOME/.kube/config-pi
 	kubectl config use-context kubernetes-pi # whatever context you've named for your pi cluster config
 	```
+
+### Worker Nodes
+
+Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 192.168.3.1/24` (ip may differ).
+
+1. Repeat the general [setup](#setup) from above for each worker node.
+1. Change hostnames to `k8s-worker-n` via `sudo raspi-config`. After rebooting, it should be possible to `ssh` in without ips:
+	```bash
+	ssh pi@k8s-worker-1.local
+	ssh pi@k8s-worker-2.local
+	```
+2. Join the nodes to the cluster:
+	```bash
+	kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
+	```
+
 
 
 ---
