@@ -37,9 +37,8 @@ Component | Quantity
 
 ## Setup
 
->__Note:__ These instructions are for Macs.
-
-* Much of this setup is following the [Kubernetes on Raspbian Lite][k8s-raspbian] guide by [Alex Ellis][alex-ellis].
+>__Note:__ These instructions are for Macs. Much of this setup is following the
+[Kubernetes on Raspbian Lite][k8s-raspbian] guide by [Alex Ellis][alex-ellis].
 
 ### Master Node
 
@@ -51,7 +50,7 @@ Component | Quantity
 	```bash
 	brew cask install etcher
 	```
-3. Enable __ssh__ on the SD card:
+3. Enable __ssh__ by placing an empty file on the sd card:
 	```bash
 	touch /Volumes/boot/shh
 	```
@@ -100,6 +99,7 @@ Component | Quantity
 	```bash
 	cgroup_enable=cpuset cgroup_enable=memory
 	```
+	__Note:__ `cgroup_memory=1` might be needed for some pi3 models.
 	```bash
 	sudo reboot
 	```
@@ -121,7 +121,7 @@ Component | Quantity
 11. Save the generated `join-token` for the other nodes:
 	```bash
 	# example
-	kubeadm join 192.168.2.2:6443 --token jovjri.gn9250040r4ss0vc --discovery-token-ca-cert-hash sha256:bee697b5558e9f10ac4010d558d8c6e0a93f2ad61c217049dfdad49bec8799bf
+	kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
 	```
 
 12. Verify everything is running (system pods might show `Pending` for a while) and install addons:
@@ -131,6 +131,19 @@ Component | Quantity
 	* See the [installing addons][install-addons] doc
 	* Run `kubectl apply -f [podnetwork].yaml` with one of the addons to deploy it to the cluster.
 
+13. Install a network driver like [Weave Net][weave-net]:
+	```bash
+	kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+	```
+
+14. Copy cluster `config` to local machine to connect with cluster without `ssh`ing in to the master node:
+	```bash
+	# from mac/non-pi
+	scp pi@k8s-master.local:~/.kube/config ~/.kube/config-pi
+	export KUBECONFIG=$KUBECONFIG:$HOME/.kube/config:$HOME/.kube/config-pi
+	kubectl config use-context kubernetes-pi # whatever context you've named for your pi cluster config
+	```
+
 
 ---
 
@@ -139,6 +152,8 @@ Component | Quantity
 * [Kubernetes on Raspbian Lite][k8s-raspbian]
 * [Headless Raspberry Pi Install][headless-pi]
 * [How to SSH into your Raspberry Pi with Mac and Ethernet Cable][ssh-mac-ethernet]
+* [Controlling your cluster from machines other than master][k8s-docs-control-outside-master]
+* [Organinzing Cluster Access Using Kubeconfig Files][k8s-docs-kubeconfig-files]
 
 [model-b+]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/
 [model-b]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b/
@@ -156,7 +171,10 @@ Component | Quantity
 [avahi]:https://linux.die.net/man/8/avahi-daemon
 [kubeadm]:https://kubernetes.io/docs/setup/independent/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
 [install-addons]:https://kubernetes.io/docs/concepts/cluster-administration/addons/
+[weave-net]:https://www.weave.works/docs/net/latest/kubernetes/kube-addon/
 
 [k8s-raspbian]:https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975
 [headless-pi]:https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
 [ssh-mac-ethernet]:https://medium.com/@tzhenghao/how-to-ssh-into-your-raspberry-pi-with-a-mac-and-ethernet-cable-636a197d055
+[k8s-docs-control-outside-master]:https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#optional-controlling-your-cluster-from-machines-other-than-the-master
+[k8s-docs-kubeconfig-files]:https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/
