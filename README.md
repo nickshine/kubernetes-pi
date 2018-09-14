@@ -5,6 +5,7 @@
 * [Setup](#setup)
   * [Master Node](#master-node)
   * [Worker Nodes](#worker-nodes)
+* [Deploy](#deploy)
 * [Reference](#reference)
 
 ---
@@ -170,6 +171,38 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 	```
 	>__Note:__ run this command from master node.. see step 5 from the [Master Node](#master-node) setup above.
 
+## Deploy
+
+### Deploy the K8s Visualizer
+
+* [GCP Live K8s Visualizer][visualizer]
+
+1. Clone and serve up the app:
+	```bash
+	git clone https://github.com/raghur/gcp-live-k8s-visualizer.git
+	kubectl proxy --www=path/to/gcp-live-k8s-visualizer
+	```
+
+2. Navigate to http://localhost:8001/static/
+
+
+### Deploy K8s Dashboard
+
+1. Create the rolebinding listed on the dashboard [access control readme][dashboard-readme]
+	```bash
+	kubectl apply -f dashboard-admin.yaml
+	```
+
+2. Deploy the dashboard:
+	```bash
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/alternative/kubernetes-dashboard.yaml
+
+	```
+3. Allow access to dashboard through master node, by changing the default dashboard service type from `ClusterIP` to `NodePort`
+	```bash
+	kubectl -n kube-system edit service kubernetes-dashboard
+	```
+
 ---
 
 ## Reference
@@ -197,6 +230,8 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 [kubeadm]:https://kubernetes.io/docs/setup/independent/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
 [install-addons]:https://kubernetes.io/docs/concepts/cluster-administration/addons/
 [weave-net]:https://www.weave.works/docs/net/latest/kubernetes/kube-addon/
+[visualizer]:https://github.com/raghur/gcp-live-k8s-visualizer
+[dashboard-readme]:https://github.com/kubernetes/dashboard/wiki/Access-control#admin-privileges
 
 [k8s-raspbian]:https://gist.github.com/alexellis/fdbc90de7691a1b9edb545c17da2d975
 [headless-pi]:https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0
