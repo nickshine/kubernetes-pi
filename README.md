@@ -175,9 +175,7 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 
 ### Deploy the K8s Visualizer
 
-* [GCP Live K8s Visualizer][visualizer]
-
-1. Clone and serve up the app:
+1. Clone the visualizer app serve using `kubectl proxy`:
 	```bash
 	git clone https://github.com/raghur/gcp-live-k8s-visualizer.git
 	kubectl proxy --www=path/to/gcp-live-k8s-visualizer
@@ -212,6 +210,7 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 * [How to SSH into your Raspberry Pi with Mac and Ethernet Cable][ssh-mac-ethernet]
 * [Controlling your cluster from machines other than master][k8s-docs-control-outside-master]
 * [Organinzing Cluster Access Using Kubeconfig Files][k8s-docs-kubeconfig-files]
+* [GCP Live K8s Visualizer][visualizer]
 
 [model-b+]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b-plus/
 [model-b]:https://www.raspberrypi.org/products/raspberry-pi-3-model-b/
