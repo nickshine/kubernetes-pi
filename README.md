@@ -47,11 +47,11 @@ Component | Quantity
 	[Etcher][etcher] is an open-source [Electron][electron] app for flashing OS
 	images to SD cards and USB drives.
 
-	```bash
+	```shell
 	brew cask install etcher
 	```
 3. Enable __ssh__ by placing an empty file on the sd card:
-	```bash
+	```shell
 	touch /Volumes/boot/ssh
 	```
 	* __Note:__ may need to mount the sd card after flashing. Example: `diskutil mount /dev/disk2s1`.
@@ -60,7 +60,7 @@ Component | Quantity
 	* [Enable _Internet Sharing_][ssh-mac-ethernet]
 	* Raspbian should have [Avahi Daemon][avahi] running, allowing for
 	  connection with `raspberrypi.local`:
-	```bash
+	```shell
 	ping raspberrypi.local
 	ssh pi@raspberrypi.local    # default pi password: raspberry
 	```
@@ -75,38 +75,62 @@ Component | Quantity
 	```
 	* __Note:__ ipaddress may differ
 
-5. Setup Locale and modify hostname to (e.g. `k8s-master`) using `raspi-config` util and reboot.
-	```bash
+5. Set up static IP address:
+
+```shell
+# Find local network settings:
+ip -4 addr show | grep global
+
+# Find address of router (or gateway):
+ip -route | grep default | aw '{print $3}'
+
+# Find the address of DNS server (likely same as gateway):
+cat /etc/resolv.conf
+
+# List network interface names:
+ls /sys/class/net/
+```
+Edit `/etc/dhcpcd.conf`:
+```
+# example static IP configuration:
+interface eth0
+static ip_address=192.168.3.2/24
+static routers=192.168.3.1
+
+```
+
+6. Setup Locale and modify hostname to (e.g. `k8s-master`) using `raspi-config` util and reboot.
+	```shell
 	sudo raspi-config
 	```
 	__Note:__
 	* Select locales with `spacebar` in raspi-config.
 	* SSH in to rasspberry pi with `<hostname>.local` now (e.g. `ssh pi@k8s-master.local`).
 
-6. Setup Docker
-	```bash
+7. Setup Docker
+	```shell
 	curl -sSL get.docker.com | sh
 	sudo usermod pi -aG docker
 	newgrp docker
 	```
-7. Turn off swap space (required for K8s)
-	```bash
+8. Turn off swap space (required for K8s)
+	```shell
 	sudo dphys-swapfile swapoff
 	sudo dphys-swapfile uninstall
 	sudo update-rc.d dphys-swapfile remove
 	```
-8. Enable __cgroups__ in `/boot/cmdline.txt` and reboot:
-	```bash
+9. Enable __cgroups__ in `/boot/cmdline.txt` and reboot:
+	```shell
 	bflags="$(head -n1 /boot/cmdline.txt) cgroup_enable=cpuset cgroup_enable=memory"
 	echo $bflags | sudo tee /boot/cmdline.txt
 	```
 	__Note:__ `cgroup_memory=1` might be needed for some pi3 models.
 
-	```bash
+	```shell
 	sudo reboot
 	```
-9. [Install kubeadm][kubeadm]
-	```bash
+10. [Install kubeadm][kubeadm]
+	```shell
 	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 	echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 	sudo apt-get update
@@ -119,32 +143,32 @@ Component | Quantity
 
 1. Initialize master node
 	
-	```bash
+	```shell
 	sudo kubeadm init --token-ttl=0 # takes ~10 mins
 	mkdir -p $HOME/.kube
 	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 	sudo chown $(id -u):$(id -g) $HOME/.kube/config
 	```
 2. Save the generated `join-token` for the other nodes:
-	```bash
+	```shell
 	# example
 	sudo kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
 	```
 
 3. Verify everything is running (system pods might show `Pending` for a while) and install addons:
-	```bash
+	```shell
 	kubectl --namespace=kube-system get pods
 	```
 	* See the [installing addons][install-addons] doc
 	* Run `kubectl apply -f [podnetwork].yaml` with one of the addons to deploy it to the cluster.
 
 4. Install a network driver like [Weave Net][weave-net]:
-	```bash
+	```shell
 	kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 	```
 
 5. Copy cluster `config` to local machine to connect with cluster without `ssh`ing in to the master node:
-	```bash
+	```shell
 	# from mac
 	scp pi@k8s-master.local:~/.kube/config ~/.kube/config-pi
 	export KUBECONFIG=$KUBECONFIG:$HOME/.kube/config:$HOME/.kube/config-pi
@@ -157,16 +181,16 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 
 1. Repeat the general [setup](#setup) from above for each worker node.
 1. Change hostnames to `k8s-worker-n` via `sudo raspi-config`. After rebooting, it should be possible to `ssh` in without ips:
-	```bash
+	```shell
 	ssh pi@k8s-worker-1.local
 	ssh pi@k8s-worker-2.local
 	```
 2. Join the nodes to the cluster:
-	```bash
+	```shell
 	sudo kubeadm join 192.168.3.2:6443 --token l3m1rn.vyo4bpefx51upqzw --discovery-token-ca-cert-hash sha256:1ba58581a3a95c795fd603894c4ff7f7a205004c20cc17e1cbe62a870019d267
 	```
 3. Verify cluster is set up:
-	```bash
+	```shell
 	kubectl get nodes
 	```
 	>__Note:__ run this command from master node.. see step 5 from the [Master Node](#master-node) setup above.
@@ -176,7 +200,7 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 ### Deploy the K8s Visualizer
 
 1. Clone the visualizer app serve using `kubectl proxy`:
-	```bash
+	```shell
 	git clone https://github.com/raghur/gcp-live-k8s-visualizer.git
 	kubectl proxy --www=path/to/gcp-live-k8s-visualizer
 	```
@@ -187,17 +211,17 @@ Find the other pi's on the ethernet switch with `arp -a`, or `sudo nmap -n -sn 1
 ### Deploy K8s Dashboard
 
 1. Create the rolebinding listed on the dashboard [access control readme][dashboard-readme]
-	```bash
+	```shell
 	kubectl apply -f dashboard-admin.yaml
 	```
 
 2. Deploy the dashboard:
-	```bash
+	```shell
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/alternative/kubernetes-dashboard.yaml
 
 	```
 3. Allow access to dashboard through master node, by changing the default dashboard service type from `ClusterIP` to `NodePort`
-	```bash
+	```shell
 	kubectl -n kube-system edit service kubernetes-dashboard
 	```
 
