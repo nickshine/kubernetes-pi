@@ -82,7 +82,7 @@ Component | Quantity
 	ip -4 addr show | grep global
 
 	# Find address of router (or gateway):
-	ip -route | grep default | aw '{print $3}'
+	ip route | grep default | aw '{print $3}'
 
 	# Find the address of DNS server (likely same as gateway):
 	cat /etc/resolv.conf
@@ -92,6 +92,7 @@ Component | Quantity
 	```
 
 	Edit `/etc/dhcpcd.conf`:
+
 	```
 	# example static IP configuration:
 	interface eth0
