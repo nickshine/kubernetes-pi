@@ -77,27 +77,27 @@ Component | Quantity
 
 5. Set up static IP address:
 
-```shell
-# Find local network settings:
-ip -4 addr show | grep global
+	```shell
+	# Find local network settings:
+	ip -4 addr show | grep global
 
-# Find address of router (or gateway):
-ip -route | grep default | aw '{print $3}'
+	# Find address of router (or gateway):
+	ip -route | grep default | aw '{print $3}'
 
-# Find the address of DNS server (likely same as gateway):
-cat /etc/resolv.conf
+	# Find the address of DNS server (likely same as gateway):
+	cat /etc/resolv.conf
 
-# List network interface names:
-ls /sys/class/net/
-```
-Edit `/etc/dhcpcd.conf`:
-```
-# example static IP configuration:
-interface eth0
-static ip_address=192.168.3.2/24
-static routers=192.168.3.1
+	# List network interface names:
+	ls /sys/class/net/
+	```
+	Edit `/etc/dhcpcd.conf`:
+	```
+	# example static IP configuration:
+	interface eth0
+	static ip_address=192.168.3.2/24
+	static routers=192.168.3.1
 
-```
+	```
 
 6. Setup Locale and modify hostname to (e.g. `k8s-master`) using `raspi-config` util and reboot.
 	```shell
