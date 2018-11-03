@@ -90,13 +90,19 @@ Component | Quantity
 	# List network interface names:
 	ls /sys/class/net/
 	```
+
 	Edit `/etc/dhcpcd.conf`:
 	```
 	# example static IP configuration:
 	interface eth0
 	static ip_address=192.168.3.2/24
 	static routers=192.168.3.1
+	```
 
+	Reboot:
+
+	```
+	sudo reboot
 	```
 
 6. Setup Locale and modify hostname to (e.g. `k8s-master`) using `raspi-config` util and reboot.
